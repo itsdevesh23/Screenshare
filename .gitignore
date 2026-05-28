@@ -1,0 +1,15 @@
+# Java / Maven
+backend/target/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Logs
+*.log
+
+# Local environment
+.env
+.env.*
+
+sbu-agent/target/

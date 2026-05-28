@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: inspection-system
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inspection_system
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+app:
+  security:
+    jwt-secret: "change-this-dev-secret-before-production"
+    token-validity-minutes: 480
+  cors:
+    allowed-origins: "http://localhost:5173,http://127.0.0.1:5173"
