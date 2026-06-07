@@ -71,42 +71,48 @@ The browser app also supports browser-level remote control without the native ag
 
 This controls only the SBU web page, not the operating system or other apps.
 
-## Local Run Order
+## Office Demonstration Guide (2 PCs)
 
-1. Start PostgreSQL and create the `inspection_system` database.
+This system now uses an **embedded zero-setup H2 Database**, meaning you do NOT need PostgreSQL or Docker anymore. You can run it instantly on any PC.
 
-With Docker:
+To demonstrate the "AnyDesk-style" remote control across two computers in an office (PC 1: Controlled SBU, PC 2: Manager/Inspector):
 
-```bash
-docker compose up -d
-```
+### Step 1: Set up PC 1 (The SBU Computer)
+Ensure Node.js and Java (Maven) are installed. Open a terminal and run `ipconfig` to find this computer's IP Address (e.g., `192.168.1.50`).
 
-Without Docker:
-
-```sql
-CREATE DATABASE inspection_system;
-```
-
-2. Start the backend:
-
+**1. Start the Backend:**
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-3. Start the frontend:
-
+**2. Start the Frontend:**
 ```bash
 cd frontend
 npm.cmd install
-npm.cmd run dev
+npm.cmd run dev -- --host
+```
+*(The `--host` flag is crucial! It allows PC 2 to connect over the network).*
+
+**3. Start the Native Java Agent:**
+```bash
+cd sbu-agent
+mvn package
+java -jar target/sbu-agent-0.0.1-SNAPSHOT.jar --backend http://127.0.0.1:8080 --username sbu1 --password password
 ```
 
-4. Open:
+Log in to `http://localhost:5173/sbu/dashboard` as `sbu1` (password: `password`) and wait.
 
-```text
-http://localhost:5173
-```
+### Step 2: Set up PC 2 (The Inspector/Manager Computer)
+No installation required!
+1. Connect to the same office Wi-Fi as PC 1.
+2. Open Chrome and navigate to the IP address of PC 1:
+   `http://<PC_1_IP_ADDRESS>:5173/inspector/dashboard`
+3. Log in as `inspector1` (password: `password`) and click **"Request Access"**.
+
+### Step 3: The Demo
+1. **On PC 1:** Accept the request, click "Start Screen Share", and **MUST select "Entire Screen"**.
+2. **On PC 2:** The manager can now click inside the video feed and start typing. The Java Agent on PC 1 will physically move the mouse and type the keys!
 
 ## Demo Users
 
