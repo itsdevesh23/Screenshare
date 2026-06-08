@@ -35,6 +35,10 @@ public class InspectionRequest {
     @Column(nullable = false, length = 30)
     private InspectionRequestStatus status = InspectionRequestStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "access_level", length = 30)
+    private AccessLevel accessLevel;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -68,6 +72,10 @@ public class InspectionRequest {
         return status;
     }
 
+    public AccessLevel getAccessLevel() {
+        return accessLevel;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -80,9 +88,10 @@ public class InspectionRequest {
         return endedAt;
     }
 
-    public void accept() {
-        status = InspectionRequestStatus.ACCEPTED;
-        respondedAt = Instant.now();
+    public void accept(AccessLevel accessLevel) {
+        this.status = InspectionRequestStatus.ACCEPTED;
+        this.accessLevel = accessLevel;
+        this.respondedAt = Instant.now();
     }
 
     public void reject() {

@@ -119,6 +119,10 @@ export function InspectorScreenSharePanel({ acceptedRequest, onSessionEnded }) {
   }
 
   function handlePointerEvent(event) {
+    if (acceptedRequest?.accessLevel === 'VIEW_ONLY') {
+      return;
+    }
+
     const video = videoRef.current;
     if (!video?.srcObject) {
       return;
@@ -158,7 +162,7 @@ export function InspectorScreenSharePanel({ acceptedRequest, onSessionEnded }) {
   }
 
   function handleKeyEvent(event) {
-    if (status !== 'Viewing') return;
+    if (status !== 'Viewing' || acceptedRequest?.accessLevel === 'VIEW_ONLY') return;
     
     // Prevent default scrolling when pressing space/arrows inside the video
     if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
@@ -171,6 +175,19 @@ export function InspectorScreenSharePanel({ acceptedRequest, onSessionEnded }) {
       keyCode: event.keyCode,
       code: event.code,
       key: event.key
+    });
+  }
+
+  function handleWheelEvent(event) {
+    if (status !== 'Viewing' || acceptedRequest?.accessLevel === 'VIEW_ONLY') return;
+    
+    // Prevent default scrolling of the inspector page when scrolling inside the video pane
+    event.preventDefault();
+
+    // Send the scroll delta to the native agent
+    sendRealtimeMessage(socketRef.current, 'remote-input', acceptedRequest.id, {
+      action: 'wheel',
+      deltaY: event.deltaY
     });
   }
 
@@ -206,10 +223,18 @@ export function InspectorScreenSharePanel({ acceptedRequest, onSessionEnded }) {
           <Box>
             <Typography fontWeight={700}>SBU Screen Viewer</Typography>
             <Typography variant="body2" color="text.secondary">
-              Station: {acceptedRequest.sbuUsername}. Click inside the viewer to control the SBU browser page.
+              Station: {acceptedRequest.sbuUsername}. 
+              {acceptedRequest.accessLevel === 'VIEW_ONLY' 
+                ? ' You have View Only access.'
+                : ' Click inside the viewer to control the SBU.'}
             </Typography>
           </Box>
-          <Chip label={status} color={status === 'Viewing' ? 'success' : 'default'} />
+          <Stack direction="row" spacing={1} alignItems="center">
+            {acceptedRequest.accessLevel === 'VIEW_ONLY' && (
+              <Chip label="VIEW ONLY" color="warning" size="small" />
+            )}
+            <Chip label={status} color={status === 'Viewing' ? 'success' : 'default'} size="small" />
+          </Stack>
         </Stack>
 
         {error && <Alert severity="error">{error}</Alert>}
@@ -223,6 +248,7 @@ export function InspectorScreenSharePanel({ acceptedRequest, onSessionEnded }) {
           onPointerMove={handlePointerEvent}
           onPointerDown={handlePointerEvent}
           onPointerUp={handlePointerEvent}
+          onWheel={handleWheelEvent}
           onKeyDown={handleKeyEvent}
           onKeyUp={handleKeyEvent}
           onContextMenu={(e) => e.preventDefault()}
@@ -231,7 +257,7 @@ export function InspectorScreenSharePanel({ acceptedRequest, onSessionEnded }) {
             bgcolor: '#111827',
             aspectRatio: '16 / 9',
             objectFit: 'contain',
-            cursor: status === 'Viewing' ? 'crosshair' : 'default',
+            cursor: status === 'Viewing' && acceptedRequest.accessLevel !== 'VIEW_ONLY' ? 'crosshair' : 'default',
             outline: 'none',
             touchAction: 'none'
           }}

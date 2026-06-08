@@ -19,8 +19,13 @@ export async function fetchSbuRequests(token) {
   return authRequest(token, '/api/sbu/access-requests');
 }
 
-export async function acceptAccessRequest(token, requestId) {
-  return authRequest(token, `/api/sbu/access-requests/${requestId}/accept`, {
+export async function acceptAccessRequest(token, requestId, accessLevel) {
+  const params = new URLSearchParams();
+  if (accessLevel) {
+    params.append('accessLevel', accessLevel);
+  }
+  
+  return authRequest(token, `/api/sbu/access-requests/${requestId}/accept?${params.toString()}`, {
     method: 'POST'
   });
 }

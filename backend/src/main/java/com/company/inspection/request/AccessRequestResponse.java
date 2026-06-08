@@ -9,6 +9,7 @@ public record AccessRequestResponse(
         Long sbuId,
         String sbuUsername,
         InspectionRequestStatus status,
+        AccessLevel accessLevel,
         Instant createdAt,
         Instant respondedAt,
         Instant endedAt
@@ -21,6 +22,7 @@ public record AccessRequestResponse(
                 request.getSbu().getId(),
                 request.getSbu().getUsername(),
                 request.getStatus(),
+                request.getAccessLevel(),
                 request.getCreatedAt(),
                 request.getRespondedAt(),
                 request.getEndedAt()

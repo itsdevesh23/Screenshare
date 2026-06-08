@@ -65,6 +65,11 @@ public class RealtimeWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
+        if ("remote-input".equals(realtimeMessage.type()) && info.accessLevel() == com.company.inspection.request.AccessLevel.VIEW_ONLY) {
+            // Silently drop input messages if the session is view-only
+            return;
+        }
+
         broadcastExcept(session, Map.of(
                 "type", realtimeMessage.type(),
                 "requestId", realtimeMessage.requestId(),
@@ -105,7 +110,7 @@ public class RealtimeWebSocketHandler extends TextWebSocketHandler {
 
         return tokenService.validate(token)
                 .filter(claims -> isParticipant(claims.userId(), claims.role(), request))
-                .map(claims -> new RealtimeSessionInfo(claims.userId(), claims.username(), claims.role(), requestId))
+                .map(claims -> new RealtimeSessionInfo(claims.userId(), claims.username(), claims.role(), requestId, request.accessLevel()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid realtime token"));
     }
 

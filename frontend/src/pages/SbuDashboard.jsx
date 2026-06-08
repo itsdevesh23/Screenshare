@@ -10,8 +10,16 @@ import {
   Chip,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
+  FormControlLabel,
   Paper,
+  Radio,
+  RadioGroup,
   Stack,
   Typography
 } from '@mui/material';
@@ -31,6 +39,10 @@ export function SbuDashboard() {
   const [loading, setLoading] = useState(true);
   const [busyRequestId, setBusyRequestId] = useState(null);
   const [error, setError] = useState('');
+  
+  // Dialog state
+  const [acceptDialogRequestId, setAcceptDialogRequestId] = useState(null);
+  const [selectedAccessLevel, setSelectedAccessLevel] = useState('VIEW_ONLY');
 
   const pendingRequests = useMemo(
     () => requests.filter((request) => request.status === 'PENDING'),
@@ -75,17 +87,18 @@ export function SbuDashboard() {
     };
   }, [token]);
 
-  async function updateRequest(requestId, action) {
+  async function updateRequest(requestId, action, accessLevel = 'VIEW_ONLY') {
     setBusyRequestId(requestId);
     setError('');
 
     try {
       if (action === 'accept') {
-        await acceptAccessRequest(token, requestId);
+        await acceptAccessRequest(token, requestId, accessLevel);
       } else {
         await rejectAccessRequest(token, requestId);
       }
       setRequests(await fetchSbuRequests(token));
+      setAcceptDialogRequestId(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -160,7 +173,7 @@ export function SbuDashboard() {
                           color="success"
                           startIcon={<CheckCircleIcon />}
                           disabled={busyRequestId === request.id || Boolean(acceptedRequest)}
-                          onClick={() => updateRequest(request.id, 'accept')}
+                          onClick={() => setAcceptDialogRequestId(request.id)}
                         >
                           Accept
                         </Button>
@@ -214,6 +227,56 @@ export function SbuDashboard() {
           </Paper>
         </Stack>
       </Container>
+
+      <Dialog open={Boolean(acceptDialogRequestId)} onClose={() => setAcceptDialogRequestId(null)}>
+        <DialogTitle>Select Access Level</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            What level of access would you like to grant to the inspector?
+          </DialogContentText>
+          <RadioGroup
+            value={selectedAccessLevel}
+            onChange={(e) => setSelectedAccessLevel(e.target.value)}
+          >
+            <FormControlLabel
+              value="VIEW_ONLY"
+              control={<Radio />}
+              label={
+                <Box>
+                  <Typography fontWeight={700}>View Only</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    The inspector can only watch your screen. Mouse and keyboard control are disabled.
+                  </Typography>
+                </Box>
+              }
+              sx={{ mb: 1 }}
+            />
+            <FormControlLabel
+              value="FULL_CONTROL"
+              control={<Radio />}
+              label={
+                <Box>
+                  <Typography fontWeight={700}>Full Control</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    The inspector can watch and interact with your screen using their mouse and keyboard.
+                  </Typography>
+                </Box>
+              }
+            />
+          </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAcceptDialogRequestId(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="success"
+            disabled={Boolean(busyRequestId)}
+            onClick={() => updateRequest(acceptDialogRequestId, 'accept', selectedAccessLevel)}
+          >
+            Confirm Accept
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardShell>
   );
 }

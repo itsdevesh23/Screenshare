@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -29,9 +30,10 @@ public class SbuAccessRequestController {
     @PostMapping("/{requestId}/accept")
     public ResponseEntity<AccessRequestResponse> accept(
             @AuthenticationPrincipal AppUser sbu,
-            @PathVariable Long requestId
+            @PathVariable Long requestId,
+            @RequestParam(defaultValue = "FULL_CONTROL") AccessLevel accessLevel
     ) {
-        return ResponseEntity.ok(accessRequestService.acceptRequest(sbu, requestId));
+        return ResponseEntity.ok(accessRequestService.acceptRequest(sbu, requestId, accessLevel));
     }
 
     @PostMapping("/{requestId}/reject")

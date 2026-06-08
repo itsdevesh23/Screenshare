@@ -222,6 +222,17 @@ public class SbuAgentApplication {
                 return;
             }
 
+            if ("wheel".equals(action)) {
+                int deltaY = payload.path("deltaY").asInt();
+                // Java Robot scroll amounts are in 'notches'. Browsers often report deltaY in pixels (e.g. 100).
+                // We'll normalize by taking the sign of the delta, so 1 notch down or 1 notch up per scroll event.
+                int notches = (int) Math.signum(deltaY);
+                if (notches != 0) {
+                    robot.mouseWheel(notches);
+                }
+                return;
+            }
+
             if (!"mousemove".equals(action) && !"mousedown".equals(action) && !"mouseup".equals(action) && !"click".equals(action) && !"browser-click".equals(action)) {
                 return;
             }

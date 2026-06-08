@@ -68,16 +68,19 @@ public class AccessRequestService {
     }
 
     @Transactional
-    public AccessRequestResponse acceptRequest(AppUser sbu, Long requestId) {
+    public AccessRequestResponse acceptRequest(AppUser sbu, Long requestId, AccessLevel accessLevel) {
+        // Find the pending request
         InspectionRequest request = getPendingRequestForSbu(sbu, requestId);
 
+        // Ensure there isn't already an active accepted session
         requestRepository.findFirstBySbuAndStatusInOrderByCreatedAtDesc(sbu, List.of(InspectionRequestStatus.ACCEPTED))
                 .ifPresent(existing -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "An accepted session is already active");
                 });
 
-        request.accept();
-        return AccessRequestResponse.from(request);
+        request.accept(accessLevel);
+        InspectionRequest saved = requestRepository.save(request);
+        return AccessRequestResponse.from(saved);
     }
 
     @Transactional
