@@ -53,15 +53,15 @@ graph TD
     end
 
     %% Connections
-    I_Browser -->|1. HTTP REST & JWT| Backend
-    S_Browser -->|1. HTTP REST & JWT| Backend
-    Agent -->|1. HTTP REST (Polling)| Backend
+    I_Browser -->|1. HTTP REST and JWT| Backend
+    S_Browser -->|1. HTTP REST and JWT| Backend
+    Agent -->|1. HTTP REST Polling| Backend
     
-    I_Browser -->|2. WebSocket (Signaling & Inputs)| Backend
-    S_Browser -->|2. WebSocket (Signaling)| Backend
-    Agent -->|2. WebSocket (Inputs)| Backend
+    I_Browser -->|2. WebSocket Signaling and Inputs| Backend
+    S_Browser -->|2. WebSocket Signaling| Backend
+    Agent -->|2. WebSocket Inputs| Backend
 
-    I_Browser -->|3. Pure WebRTC (Peer-to-Peer Video)| S_Browser
+    I_Browser -->|3. Pure WebRTC Peer to Peer Video| S_Browser
     
     Agent -->|4. Native API Injection| OS
     
