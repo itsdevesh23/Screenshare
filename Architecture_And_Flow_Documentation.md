@@ -43,7 +43,7 @@ graph TD
     subgraph "Intranet Server (SBU PC)"
         Backend["Spring Boot Backend Server"]
         DB[(H2 In-Memory DB)]
-        Backend <-->|JPA/Hibernate| DB
+        Backend <--> DB
     end
 
     subgraph "SBU PC (The controlled computer)"
@@ -53,15 +53,15 @@ graph TD
     end
 
     %% Connections
-    I_Browser <-->|1. HTTP REST & JWT| Backend
-    S_Browser <-->|1. HTTP REST & JWT| Backend
-    Agent <-->|1. HTTP REST (Polling)| Backend
+    I_Browser -->|1. HTTP REST & JWT| Backend
+    S_Browser -->|1. HTTP REST & JWT| Backend
+    Agent -->|1. HTTP REST (Polling)| Backend
     
-    I_Browser <-->|2. WebSocket (Signaling & Inputs)| Backend
-    S_Browser <-->|2. WebSocket (Signaling)| Backend
-    Agent <-->|2. WebSocket (Inputs)| Backend
+    I_Browser -->|2. WebSocket (Signaling & Inputs)| Backend
+    S_Browser -->|2. WebSocket (Signaling)| Backend
+    Agent -->|2. WebSocket (Inputs)| Backend
 
-    I_Browser <====>|3. Pure WebRTC (Peer-to-Peer Video)| S_Browser
+    I_Browser -->|3. Pure WebRTC (Peer-to-Peer Video)| S_Browser
     
     Agent -->|4. Native API Injection| OS
     
@@ -99,7 +99,7 @@ sequenceDiagram
     B-->>S: Relay "Answer"
     
     Note over I,S: Direct Peer-to-Peer Connection Established
-    S=>>I: Stream Real-time Screen Video
+    S->>I: Stream Real-time Screen Video
 ```
 
 ### B. Remote Control Flow (Full Control Mode)
